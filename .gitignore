@@ -1,0 +1,11 @@
+#config.org#
+.lsp-session-v1
+config.el
+config.html
+config.org~
+elpa/
+history
+init.el
+init.el~
+README.el
+recentf
