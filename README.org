@@ -63,6 +63,8 @@
      "j"  '(evil-window-down :wk "Move to down buffer")
      "k"  '(evil-window-up :wk "Move to up buffer")
      "l"  '(evil-window-right :wk "Move to right buffer")
+  
+     "c"  '(evil-window-delete :wk "Delete buffer")
      )
     )
 #+end_src  
@@ -398,7 +400,6 @@ Firstly we just configure the bullets to look pretty :3
   (evil-org-mode))
 
 #+end_src
-
 
 
 * Terminal
