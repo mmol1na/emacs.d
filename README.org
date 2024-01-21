@@ -2,31 +2,52 @@
 #+AUTHOR: Martin Molina (alele)
 #+DESCRIPTION: My emacs own configuration file.
 
-
 * Default User Interface
 ** Some defaults 
 #+begin_src emacs-lisp
   (setq inhibit-startup-message t) ; No startup message
-
+  (byte-compile-disable-warning t)
   (scroll-bar-mode -1) ; Disable visible scroll-bar
   (tool-bar-mode -1) ; Disable the tool bar
   (tooltip-mode -1) ; Disable the tooltip
   (menu-bar-mode -1) ; Disable menu bar
   (set-fringe-mode 10) ; Give some breathing room
   (setq-default indent-tabs-mode nil)
-  
+  (setq scroll-margin 10
+        scroll-step 1
+        scroll-conservatively 10000
+        scroll-preserve-screen-position 1)
+
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+  (setq auto-save-list-file-prefix "~/.emacs.d/autosave/")
+
+  (setq auto-save-file-name-transforms
+        '((".*" "~/.emacs.d/autosave/" t)))
 #+end_src
 ** Line numbers
 #+begin_src emacs-lisp
-(setq display-line-numbers-type 'relative)
-(global-display-line-numbers-mode t)
+    (setq display-line-numbers-type 'relative)
+    (global-display-line-numbers-mode t)
+
+    ;; Disable line numbers for some modes
+    (dolist (mode '(org-mode-hook
+                    term-mode-hook
+                    eshell-mode-hook
+                    vterm-mode-hook))
+      (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
 ** Font Config
 #+begin_src emacs-lisp
-;(set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 145 :weight 'regular)
-(set-face-attribute 'default nil :font "VictorMono Nerd Font" :height 120 :weight 'semi-bold)
-#+End_src
+  (set-face-attribute 'variable-pitch nil :font "Ubuntu" :height 130 :weight 'regular)
+  (set-face-attribute 'default nil :font "Berkeley Mono" :height 130 :weight 'regular)
+  (add-to-list 'default-frame-alist
+               '(font . "VictorMono Nerd Font-13"))
+  (add-to-list 'default-frame-alist
+               '(font . "Ubuntu-13"))
+  (add-to-list 'default-frame-alist
+               '(font . "Berkeley Mono-13"))
+#+end_src
 * Packages Configuration
 ** Setting up packages
 #+begin_src emacs-lisp
@@ -49,24 +70,64 @@
     :config
     (general-evil-setup)
     (general-create-definer alele/leader-keys
-                            :states '(normal insert visual emacs)
-                            :keymaps 'override
-                            :prefix "SPC"
-                            :global-prefix "M-SPC")
-    (alele/leader-keys
-     "f"  '(:ignore t :wk "find")
-     "ff" '(counsel-find-file :wk "Find File")
-     "v"  '(evil-window-vsplit :wk "Vertical Split")
-     "s"  '(evil-window-split :wk "Horizontal Split")
+      :states '(normal insert visual emacs)
+      :keymaps 'override
+      :prefix "SPC"
+      :global-prefix "M-SPC")
 
-     "h"  '(evil-window-left :wk "Move to left buffer")
-     "j"  '(evil-window-down :wk "Move to down buffer")
-     "k"  '(evil-window-up :wk "Move to up buffer")
-     "l"  '(evil-window-right :wk "Move to right buffer")
-  
-     "c"  '(evil-window-delete :wk "Delete buffer")
-     )
-    )
+    (alele/leader-keys
+      "f"  '(:ignore t :wk "find")
+      "fc"  ' ((lambda () (interactive) (find-file "~/.emacs.d/README.org")) :wk "Edit emacs config")
+      "ff" '(counsel-find-file :wk "Find File")
+      "fr" '(:ignore :wk "Find Ramos")
+      "frp" '((lambda () (interactive) (counsel-find-file nil "~/Documents/PSS/")) :wk "PSS")
+      "frm" '((lambda () (interactive) (counsel-find-file nil "~/Documents/Memes/")) :wk "Memes")
+      "frb" '((lambda () (interactive) (counsel-find-file nil "~/Documents/BDeDatos/")) :wk "Batos")
+      "frw" '((lambda () (interactive) (counsel-find-file nil "~/Documents/Web/")) :wk "Web")
+      )
+
+
+    (alele/leader-keys
+      "SPC"  '(counsel-M-x :wk "find")
+      )
+
+    (alele/leader-keys
+      "t"  '(:ignore :wk "theme")
+      "tt"  '(ef-themes-toggle :wk "Toggle Dark/Light Mode")
+      )
+
+    (alele/leader-keys
+      "e"  '(:ignore :wk "Eglot")
+      "ef"  '(eglot-format-buffer :wk "Format current buffer")
+      "ec"  '(eglot-code-actions :wk "Code actions")
+      )
+
+    (alele/leader-keys
+      "b" '(:ignore t :wk "buffer")
+      "b b" '(switch-to-buffer :wk "Switch buffer")
+      "b i" '(counsel-ibuffer :wk "Ibuffer")
+      "b k" '(kill-this-buffer :wk "Kill this buffer")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b r" '(revert-buffer :wk "Reload buffer"))
+
+    (alele/leader-keys
+      "v"  '(evil-window-vsplit :wk "Vertical Split")
+      "s"  '(evil-window-split :wk "Horizontal Split")
+
+      "h"  '(evil-window-left :wk "Move to left window")
+      "j"  '(evil-window-down :wk "Move to down window")
+      "k"  '(evil-window-up :wk "Move to up window")
+      "l"  '(evil-window-right :wk "Move to right window")
+
+      "c"  '(evil-window-delete :wk "Delete window"))
+
+    (alele/leader-keys
+      "S"  '(:ignore :wk "Spotify options")
+      "St" '(smudge-track-search :wk "Search track")
+      "Sp" '(smudge-controller-toggle-play :wk "Play/Pause")
+      "Sm" '(smudge-my-playlists :wk "Show My playlists")
+      ))
 #+end_src  
 
 ** Which-key
@@ -86,7 +147,6 @@
 
 * Completion Configuration
 ** Corfu (The cmp equivalent for Emacs) 
-
 #+begin_src emacs-lisp
   (use-package corfu
     ;; Optional customizations
@@ -155,9 +215,10 @@
            ("C-k" . ivy-previous-line)
            ("C-d" . ivy-reverse-i-search-kill))
     :config
+    (define-key ivy-mode-map [remap execute-extended-command] 'counsel-M-x)
     (ivy-mode 1))
 
-  
+
 
   (use-package counsel)
   (use-package swiper)
@@ -184,63 +245,36 @@ Configure snippets (so hard!)
     :config
     (add-to-list 'completion-at-point-functions #'yasnippet-capf))
 #+end_src
-** LSP config
+** Eglot Configuration
 #+begin_src emacs-lisp
-(use-package lsp-mode
-  :defer t
-  :bind (("C-h ," . help-at-pt-buffer)
-         (:map lsp-mode-map
-               ("M-<return>" . lsp-execute-code-action))
-         (:map c++-mode-map
-               ("C-c x" . lsp-clangd-find-other-file))
-         (:map c-mode-map
-               ("C-c x" . lsp-clangd-find-other-file)))
-  :commands (lsp lsp-deferred)
-  :init
-  ;; (setenv "LSP_USE_PLISTS" "1")
-  ;; Increase the amount of data emacs reads from processes
-  (setq read-process-output-max (* 3 1024 1024))
-  (setq lsp-clients-clangd-args '("--header-insertion-decorators=0"
-                                  "--clang-tidy"
-                                  "--enable-config"))
-  ;; General lsp-mode settings
-  (setq lsp-completion-provider :none
-        lsp-enable-snippet t
-        lsp-enable-on-type-formatting nil
-        lsp-enable-indentation nil
-        lsp-diagnostics-provider :flymake
-        lsp-keymap-prefix "C-x L"
-        lsp-eldoc-render-all t)
-  ;; to enable the lenses
-  (add-hook 'lsp-mode-hook #'lsp-lens-mode)
-  (add-hook 'lsp-completion-mode-hook
-            (lambda ()
-              (setf (alist-get 'lsp-capf completion-category-defaults)
-                    '((styles . (orderless))))))
-  :config
-  (defun help-at-pt-buffer ()
-    (interactive)
-    (let ((help (help-at-pt-kbd-string))
-          (h-at-p-buf "*Help At Point*"))
-      (if help
-          (progn (with-current-buffer (get-buffer-create h-at-p-buf)
-                   (view-mode -1)
-                   (erase-buffer) (insert (format "%s" (substitute-command-keys help)))
-                   (view-mode +1))
-                 (switch-to-buffer-other-window h-at-p-buf))
-        (if (not arg) (message "No local help at point")))))
-  (use-package lsp-ui
-    :ensure t
-    :after lsp
-    :init
-    (setq lsp-ui-sideline-show-code-actions t)
-    (setq lsp-ui-sideline-show-diagnostics t)))
-
+  (add-hook 'c-mode-hook 'eglot-ensure)
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'zig-mode-hook 'eglot-ensure)
 #+end_src
+*** Rust Config
+#+begin_src emacs-lisp
+  (use-package rust-mode)
+  (add-to-list 'exec-path (expand-file-name "~/.cargo/bin"))
+  (add-hook 'rust-mode-hook
+            (lambda () (setq indent-tabs-mode nil))
+            (lambda () (prettify-symbols-mode)))
+
+  (setq rust-format-on-save t)
+#+end_src
+*** Python Config
+#+begin_src emacs-lisp
+  (use-package python-mode)
+
+  (use-package python-black
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+#+end_src
+*** Emmet Config
 
 * Theming
 ** Themes
-
+*** Doom Themes
 #+begin_src emacs-lisp
   (use-package doom-themes
     :ensure t
@@ -258,21 +292,78 @@ Configure snippets (so hard!)
     (doom-themes-treemacs-config)
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
+#+end_src
+*** Modus Theme 
+#+begin_src emacs-lisp
+  (setq modus-themes-completions
+        (quote ((matches . (extrabold background intense))
+                (selection . (semibold accented intense))
+                (popup . (accented)))))
 
-  (use-package color-theme-sanityinc-tomorrow
-    :ensure t
-    :config)
+  (setq modus-themes-region '(bg-only))
+  (setq modus-themes-org-blocks 'tinted-background)
+  (setq modus-themes-headings
+        '((1 . (rainbow background 1.4))
+          (2 . (rainbow background 1.3))
+          (3 . (rainbow bold 1.1))
+          (t . (semilight 1.1))))
 
-  (use-package catppuccin-theme
-    :ensure t
-    :config
-    (load-theme 'catppuccin t)
-    (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, or 'mocha
-    (catppuccin-reload))
+  ;; (setq modus-themes-common-palette-overrides
+  ;;       `(
+  ;;         ;; From the section "Make the mode line borderless"
+  ;;         (border-mode-line-active unspecified)
+  ;;         (border-mode-line-inactive unspecified)
+
+  ;;         ;; From the section "Make matching parenthesis more or less intense"
+  ;;         (bg-paren-match bg-magenta-intense)
+  ;;         (underline-paren-match fg-main)
+
+  ;;         (bg-tab-current bg-magenta-intense)
+  ;;         (bg-tab-bar bg-cyan-nuanced)
+  ;;         (bg-tab-other bg-cyan-subtle)
+  ;;         ;; And expand the preset here.  Note that the ,@ works because
+  ;;         ;; we use the backtick for this list, instead of a straight
+  ;;         ;; quote.
+  ;;         ,@modus-themes-preset-overrides-intense))
+
+
+(load-theme 'modus-vivendi t)
+#+end_src
+*** Ef Themes
+#+begin_src emacs-lisp
+   ;; Make customisations that affect Emacs faces BEFORE loading a theme
+  ;; (any change needs a theme re-load to take effect).
+  (require 'ef-themes)
+
+  ;; If you like two specific themes and want to switch between them, you
+  ;; can specify them in `ef-themes-to-toggle' and then invoke the command
+  ;; `ef-themes-toggle'.  All the themes are included in the variable
+  ;; `ef-themes-collection'.
+  (setq ef-themes-to-toggle '(ef-bio ef-spring))
+
+  (setq ef-themes-headings ; read the manual's entry or the doc string
+        '((0 light 1.9)
+          (1  light 1.8)
+          (2  regular 1.7)
+          (3  regular 1.6)
+          (4  regular 1.5)
+          (5  1.4) ; absence of weight means `bold'
+          (6  1.3)
+          (7  1.2)
+          (t  1.1)))
+
+
+  ;; Disable all other themes to avoid awkward blending:
+  (mapc #'disable-theme custom-enabled-themes)
+
+
+  ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
+  (ef-themes-select 'ef-bio)
+
+
 #+end_src
 
 ** Parenthesis styling
-
 #+begin_src emacs-lisp
     (use-package paren
     :ensure nil
@@ -285,6 +376,11 @@ Configure snippets (so hard!)
 
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
+  
+  (use-package smartparens
+    :config
+
+    (smartparens-global-mode))
 #+end_src
 
 ** Modeline Configuration
@@ -294,7 +390,7 @@ Configure snippets (so hard!)
     :ensure t
     :init (doom-modeline-mode 1)
     :config
-    (setq doom-modeline-buffer-file-name-style 'filename
+    (setq doom-modeline-buffer-file-name-style 'auto
           doom-modeline-enable-word-count t
           doom-modeline-buffer-encoding nil
           doom-modeline-icon t
@@ -302,7 +398,7 @@ Configure snippets (so hard!)
           doom-modeline-major-mode-icon t
           doom-modeline-major-mode-color-icon t
           doom-modeline-bar-width 3
-          doom-modeline-height 30
+          doom-modeline-height 40
           )
     )
 #+end_src
@@ -312,20 +408,20 @@ Configure snippets (so hard!)
 This is basically the vim emulation layer, basically a fully implemented vim editor inside emacs
 
 #+begin_src emacs-lisp
-(unless (package-installed-p 'evil)
-  (package-install 'evil))
+  (unless (package-installed-p 'evil)
+    (package-install 'evil))
 
-(setq evil-want-C-u-scroll t)
-(require 'evil)
-(evil-set-undo-system 'undo-redo)
-(evil-mode 1)
+  (setq evil-want-C-u-scroll t)
+  (require 'evil)
+  (evil-set-undo-system 'undo-redo)
+  (evil-mode 1)
 
-(use-package evil-escape)
-(setq-default evil-escape-key-sequence "jj")
-(setq-default evil-escape-delay 0.3)
-(setq evil-escape-inhibit-functions '(evil-visual-state-p))
-(setq-default evil-escape-excluded-major-modes '(dired-mode neotree-mode evil-visual-state)) 
-(evil-escape-mode 1)
+  (use-package evil-escape)
+  (setq-default evil-escape-key-sequence "jj")
+  (setq-default evil-escape-delay 0.3)
+  (setq evil-escape-inhibit-functions '(evil-visual-state-p))
+  (setq-default evil-escape-excluded-major-modes '(dired-mode neotree-mode evil-visual-state)) 
+  (evil-escape-mode 1)
 #+end_src
 
 * Org Mode 
@@ -370,9 +466,11 @@ Firstly we just configure the bullets to look pretty :3
   (defun alele/org-setup()
     (org-indent-mode)
     (visual-line-mode 1)
+    (visual-fill-column-mode 1)
 
-    (setq-local line-spacing 1)
-    )
+    (setq visual-fill-column-width 120
+          visual-fill-column-center-text t)
+    (setq-local line-spacing 3))
 #+end_src
 
 ** Org Mode Config
@@ -401,10 +499,34 @@ Firstly we just configure the bullets to look pretty :3
 
 #+end_src
 
-
 * Terminal
 #+begin_src emacs-lisp
   (use-package vterm
     :ensure t)
 #+end_src
 
+* Misc
+#+begin_src emacs-lisp
+  (use-package smudge
+    :config
+    (setq smudge-oauth2-client-secret "569e360be03047849f69c8c0cb13e633")
+    (setq smudge-oauth2-client-id "db6445ff85114ff085b167f60e79f024")
+    (setq smudge-status-location 'modeline)
+    (setq smudge-transport 'connect)
+    )
+
+#+end_src
+
+** RSS Feed
+
+#+begin_src emacs-lisp
+  (setq elfeed-feeds (quote
+                      (("https://www.reddit.com/r/linux.rss" linux-reddit))))
+#+end_src
+
+* Git
+** Magit
+#+begin_src emacs-lisp
+  (use-package magit
+    :ensure t)
+#+end_src
